@@ -1,30 +1,26 @@
 import os
-import telepot
-import time
-from telepot.loop import MessageLoop
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
 from pprint import pprint
 
-# 測試是否有連上自己的 bot
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-bot = telepot.Bot(BOT_TOKEN)
-# print(bot.getMe())
 
-# 從 telegram 上接收訊息
-def handle(msg):
-    pprint(msg)
-    chat_id = msg['chat']['id']
-    # from_id = msg['from']['id']
-    text = '你說的是： ' + msg['text']
-    # photo = 'https://pic.pimg.tw/like9417/1504869777-564645577.jpg?v=1504869878'
-    photo = 'https://i.meee.com.tw/7Y3VRQ7.jpg'
+# 接收使用者訊息後回覆
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
-    # 用 bot 回訊息在 telegram 上
-    bot.sendMessage(chat_id, text, parse_mode=None, disable_web_page_preview=None, disable_notification=None, reply_to_message_id=None, reply_markup=None)
-    # 用 bot 回圖片在 telegram 上
-    bot.sendPhoto(chat_id, photo, caption=None, parse_mode=None, disable_notification=None, reply_to_message_id=None, reply_markup=None)
+    pprint(update.message.to_dict())
+    # user_text = update.message.text
+    # reply = f"你說的是： {user_text}"
+    # await update.message.reply_text(reply)
+    
+    keyboard = InlineKeyboardMarkup([[
+        InlineKeyboardButton("🚀 Start!", web_app=WebAppInfo(url="https://pre-register.web.app/"))
+    ]])
+    await update.message.reply_text("Press Button To Start Preregistation：", reply_markup=keyboard)
 
-MessageLoop(bot, handle).run_as_thread()
-print("I'm listening...")
-
-while 1:
-    time.sleep(5)
+# 啟動 bot
+if __name__ == "__main__":
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    print("🤖 I'm listening...")
+    app.run_polling()
